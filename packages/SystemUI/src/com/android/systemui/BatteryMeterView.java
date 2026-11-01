@@ -157,9 +157,9 @@ public class BatteryMeterView extends LinearLayout implements
                 com.android.internal.R.string.status_bar_battery);
         mBatteryIconView = new ImageView(context);
         mBatteryIconView.setImageDrawable(mThemedDrawable);
-        final MarginLayoutParams mlp = new MarginLayoutParams(
-                getResources().getDimensionPixelSize(R.dimen.status_bar_battery_icon_width),
-                getResources().getDimensionPixelSize(R.dimen.status_bar_battery_icon_height));
+        int resHeight = getResources().getDimensionPixelSize(R.dimen.status_bar_battery_icon_height);
+        int resWidth = (resHeight * 7) / 3;
+        final MarginLayoutParams mlp = new MarginLayoutParams(resWidth, resHeight);
         mlp.setMargins(0, 0, 0,
                 getResources().getDimensionPixelOffset(R.dimen.battery_margin_bottom));
         addView(mBatteryIconView, mlp);
@@ -405,6 +405,10 @@ public class BatteryMeterView extends LinearLayout implements
     }
 
     private void updateShowPercent() {
+        if (mBatteryPercentView != null) {
+            mBatteryPercentView.setVisibility(View.GONE);
+            return;
+        }
         final boolean showing = mBatteryPercentView != null;
         final int showBatteryPercent = LineageSettings.System.getIntForUser(
                 getContext().getContentResolver(), STATUS_BAR_SHOW_BATTERY_PERCENT, 0, mUser);
@@ -463,7 +467,7 @@ public class BatteryMeterView extends LinearLayout implements
         int batteryHeight = res.getDimensionPixelSize(R.dimen.status_bar_battery_icon_height);
         int batteryWidth = mBatteryStyle == BATTERY_STYLE_CIRCLE ?
                 res.getDimensionPixelSize(R.dimen.status_bar_battery_icon_circle_width) :
-                res.getDimensionPixelSize(R.dimen.status_bar_battery_icon_width);
+                (batteryHeight * 7) / 3;
         int marginBottom = res.getDimensionPixelSize(R.dimen.battery_margin_bottom);
 
         LinearLayout.LayoutParams scaledLayoutParams = new LinearLayout.LayoutParams(

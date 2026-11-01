@@ -398,19 +398,19 @@
 
     <dimen name="volume_dialog_panel_transparent_padding">20dp</dimen>
 
-    <dimen name="volume_dialog_stream_padding">8dp</dimen>
+    <dimen name="volume_dialog_stream_padding">0dp</dimen>
 
-    <dimen name="volume_dialog_panel_width">64dp</dimen>
+    <dimen name="volume_dialog_panel_width">56dp</dimen>
 
-    <dimen name="volume_dialog_slider_height">116dp</dimen>
+    <dimen name="volume_dialog_slider_height">238dp</dimen>
 
-    <dimen name="volume_dialog_ringer_size">64dp</dimen>
+    <dimen name="volume_dialog_ringer_size">56dp</dimen>
 
-    <dimen name="volume_dialog_ringer_icon_padding">20dp</dimen>
+    <dimen name="volume_dialog_ringer_icon_padding">16dp</dimen>
 
     <dimen name="volume_dialog_caption_size">64dp</dimen>
 
-    <dimen name="volume_dialog_tap_target_size">48dp</dimen>
+    <dimen name="volume_dialog_tap_target_size">40dp</dimen>
 
     <dimen name="volume_dialog_spacer">4dp</dimen>
 
@@ -536,8 +536,8 @@
     <!-- Padding between subtitles and the following text in the QSFooter dialog -->
     <dimen name="qs_footer_dialog_subtitle_padding">20dp</dimen>
 
-    <dimen name="seek_bar_height">3dp</dimen>
-    <dimen name="seek_bar_corner_radius">3dp</dimen>
+    <dimen name="seek_bar_height">32dp</dimen>
+    <dimen name="seek_bar_corner_radius">16dp</dimen>
 
     <!-- Zen mode panel: condition item button padding -->
     <dimen name="zen_mode_condition_detail_button_padding">8dp</dimen>

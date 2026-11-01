@@ -33,6 +33,7 @@ import android.view.View;
 import com.android.keyguard.AlphaOptimizedLinearLayout;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.StatusIconDisplayable;
+import com.android.systemui.statusbar.StatusBarWifiView;
 import com.android.systemui.statusbar.notification.stack.AnimationFilter;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ViewState;
@@ -58,6 +59,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     private int mDotPadding;
     private int mStaticDotDiameter;
     private int mUnderflowWidth;
+    private float mIconSpacing;
     private int mUnderflowStart = 0;
     // Whether or not we can draw into the underflow space
     private boolean mNeedsUnderflow;
@@ -102,6 +104,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         int radius = getResources().getDimensionPixelSize(R.dimen.overflow_dot_radius);
         mStaticDotDiameter = 2 * radius;
         mUnderflowWidth = mIconDotFrameWidth + (MAX_DOTS - 1) * (mStaticDotDiameter + mDotPadding);
+        mIconSpacing = getResources().getDisplayMetrics().density * 6.5f;
     }
 
     @Override
@@ -178,6 +181,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
             } else {
                 totalWidth += getViewTotalMeasuredWidth(child);
             }
+            totalWidth += (int) mIconSpacing;
         }
 
         if (mode == MeasureSpec.EXACTLY) {
@@ -289,6 +293,11 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
             mLayoutStates.add(0, childState);
 
             translationX -= getViewTotalWidth(child);
+            if (child instanceof StatusBarWifiView) {
+                translationX += getResources().getDisplayMetrics().density * 2.5f;
+            } else {
+                translationX -= mIconSpacing;
+            }
         }
 
         // Show either 1-MAX_ICONS icons, or (MAX_ICONS - 1) icons + overflow

@@ -27,6 +27,7 @@ import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
+import java.io.File
 import android.util.PathParser
 import android.util.TypedValue
 
@@ -159,8 +160,15 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
     }
 
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).also { p ->
-        p.typeface = Typeface.create("sans-serif-condensed", Typeface.BOLD)
         p.textAlign = Paint.Align.CENTER
+        p.isDither = true
+        val fontFile = File("/system/fonts/GoogleSansRounded-Bold.ttf")
+        p.typeface = if (fontFile.exists()) {
+            try { Typeface.createFromFile(fontFile) } catch (e: Exception) { Typeface.create("sans-serif", Typeface.BOLD) }
+        } else {
+            Typeface.create("sans-serif", Typeface.BOLD)
+        }
+        p.isFakeBoldText = false
     }
 
     init {
@@ -189,97 +197,89 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
     }
 
     override fun draw(c: Canvas) {
-        c.saveLayer(null, null)
-        unifiedPath.reset()
-        levelPath.reset()
-        levelRect.set(fillRect)
-        val fillFraction = batteryLevel / 100f
-        val fillTop =
-                if (batteryLevel >= 95)
-                    fillRect.top
-                else
-                    fillRect.top + (fillRect.height() * (1 - fillFraction))
+        val b = bounds
+        val scale = b.bottom / 15f
+        val isDarkTheme = (fillColor and 0x007fffff) > 0x00400000
 
-        levelRect.top = Math.floor(fillTop.toDouble()).toFloat()
-        levelPath.addRect(levelRect, Path.Direction.CCW)
-
-        // The perimeter should never change
-        unifiedPath.addPath(scaledPerimeter)
-        // If drawing dual tone, the level is used only to clip the whole drawable path
-        if (!dualTone) {
-            unifiedPath.op(levelPath, Path.Op.UNION)
-        }
-
-        fillPaint.color = levelColor
-
-        // Deal with unifiedPath clipping before it draws
+        // Determine colors dynamically
+        val activeFillColor: Int
+        val activeTextColor: Int
+        val boltColor: Int
         if (charging) {
-            // Clip out the bolt shape
-            unifiedPath.op(scaledBolt, Path.Op.DIFFERENCE)
-            if (!invertFillIcon) {
-                c.drawPath(scaledBolt, fillPaint)
-            }
-        }
-
-        if (dualTone) {
-            // Dual tone means we draw the shape again, clipped to the charge level
-            c.drawPath(unifiedPath, dualToneBackgroundFill)
-            c.save()
-            c.clipRect(0f,
-                    bounds.bottom - bounds.height() * fillFraction,
-                    bounds.right.toFloat(),
-                    bounds.bottom.toFloat())
-            c.drawPath(unifiedPath, fillPaint)
-            c.restore()
+            activeFillColor = 0xFF34A853.toInt() // Authentic Google Material Green 500
+            activeTextColor = 0xFF383E42.toInt() // Shade 1 Refined Charcoal (Android 16 QPR2)
+            boltColor = if (isDarkTheme) Color.WHITE else 0xFF383E42.toInt()
+        } else if (batteryLevel <= 15) {
+            activeFillColor = 0xFFFF334B.toInt() // Red
+            activeTextColor = Color.WHITE
+            boltColor = 0
+        } else if (batteryLevel <= 20) {
+            activeFillColor = 0xFFFFCC00.toInt() // Yellow
+            activeTextColor = 0xFF383E42.toInt() // Shade 1 Refined Charcoal
+            boltColor = 0
         } else {
-            // Non dual-tone means we draw the perimeter (with the level fill), and potentially
-            // draw the fill again with a critical color
-            fillPaint.color = fillColor
-            c.drawPath(unifiedPath, fillPaint)
-            fillPaint.color = levelColor
-
-            // Show colorError below this level
-            if (batteryLevel <= Companion.CRITICAL_LEVEL && !charging) {
-                c.save()
-                c.clipPath(scaledFill)
-                c.drawPath(levelPath, fillPaint)
-                c.restore()
-            }
-        }
-
-        if (charging) {
-            c.clipOutPath(scaledBolt)
-            if (invertFillIcon) {
-                c.drawPath(scaledBolt, fillColorStrokePaint)
+            if (isDarkTheme) {
+                activeFillColor = Color.WHITE
+                activeTextColor = 0xFF383E42.toInt() // Shade 1 Refined Charcoal
             } else {
-                c.drawPath(scaledBolt, fillColorStrokeProtection)
+                activeFillColor = fillColor
+                activeTextColor = Color.WHITE
             }
-        } else if (powerSaveEnabled) {
-            // If power save is enabled draw the perimeter path with colorError
-            c.drawPath(scaledErrorPerimeter, errorPaint)
-            // And draw the plus sign on top of the fill
-            c.drawPath(scaledPlus, errorPaint)
+            boltColor = 0
         }
-        c.restore()
+        fillPaint.color = activeFillColor
+        textPaint.color = activeTextColor
 
-        if (!charging && batteryLevel < 100 && showPercent) {
-            textPaint.textSize = bounds.height() * 0.38f
-            val textHeight = -textPaint.fontMetrics.ascent
-            val pctX = bounds.width() * 0.5f
-            val pctY = (bounds.height() + textHeight) * 0.5f
+        // 1. Frosted track pill body: (0.5, 1.0) to (25.5, 14.0), radius 5.2
+        val pillLeft = 6.5f * scale
+        val pillTop = 1.0f * scale
+        val pillRight = 31.5f * scale
+        val pillBottom = 14.0f * scale
+        val pillRadius = 4.4f * scale
 
-            textPaint.color = fillColor
-            c.drawText(batteryLevel.toString(), pctX, pctY, textPaint)
+        levelRect.set(pillLeft, pillTop, pillRight, pillBottom)
+        unifiedPath.reset()
+        unifiedPath.addRoundRect(levelRect, pillRadius, pillRadius, Path.Direction.CCW)
+        c.drawPath(unifiedPath, dualToneBackgroundFill)
 
-            textPaint.color = fillColor.toInt().inv() or 0xFF000000.toInt()
+        // 2. Active fill
+        if (batteryLevel > 0) {
+            val fillFraction = batteryLevel / 100f
+            val fillWidth = Math.max(1.5f, 25.0f * fillFraction) * scale
+            val fillRight = pillLeft + fillWidth
             c.save()
-            c.clipRect(fillRect.left,
-                    fillRect.top + (fillRect.height() * (1 - fillFraction)),
-                    fillRect.right,
-                    fillRect.bottom)
-            c.drawText(batteryLevel.toString(), pctX, pctY, textPaint)
+            c.clipPath(unifiedPath)
+            levelRect.set(pillLeft, pillTop, fillRight, pillBottom)
+            c.drawRect(levelRect, fillPaint)
             c.restore()
         }
+
+        // 3. Right side indicator: Authentic Thunderbolt (scaled to 80% around center 25.5, 7.5)
+        if (charging) {
+            scaledBolt.reset()
+            scaledBolt.moveTo(29.9f * scale, 11.5f * scale)
+            scaledBolt.lineTo(30.3f * scale, 8.7f * scale)
+            scaledBolt.lineTo(28.3f * scale, 8.7f * scale)
+            scaledBolt.lineTo(31.9f * scale, 3.5f * scale)
+            scaledBolt.lineTo(32.7f * scale, 3.5f * scale)
+            scaledBolt.lineTo(32.3f * scale, 6.7f * scale)
+            scaledBolt.lineTo(34.7f * scale, 6.7f * scale)
+            scaledBolt.lineTo(30.7f * scale, 11.5f * scale)
+            scaledBolt.close()
+            fillPaint.color = boltColor
+            c.drawPath(scaledBolt, fillPaint)
+        } else {
+            // Stadium terminal cap: (32.2, 5.0) to (33.7, 10.0), radius 0.75 (transparent frosted)
+            levelRect.set(32.2f * scale, 5.0f * scale, 33.7f * scale, 10.0f * scale)
+            c.drawRoundRect(levelRect, 0.75f * scale, 0.75f * scale, dualToneBackgroundFill)
+        }
+
+        // 4. Centered Large Bold Text (Google Sans Rounded Bold)
+        textPaint.textSize = (if (batteryLevel == 100) 9.8f else 11.0f) * scale
+        val textX = 18.50f * scale
+        val fm = textPaint.fontMetrics
+        val textY = 7.50f * scale - (fm.descent + fm.ascent) / 2f
+        c.drawText(batteryLevel.toString(), textX, textY, textPaint)
     }
 
     private fun batteryColorForLevel(level: Int): Int {
@@ -369,17 +369,18 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
     }
 
     fun setColors(fgColor: Int, bgColor: Int, singleToneColor: Int) {
-        fillColor = if (dualTone) fgColor else singleToneColor
-
-        fillPaint.color = fillColor
-        fillColorStrokePaint.color = fillColor
-
+        fillColor = fgColor
         backgroundColor = bgColor
-        dualToneBackgroundFill.color = bgColor
-
-        // Also update the level color, since fillColor may have changed
+        val isDarkTheme = (fillColor and 0x007fffff) > 0x00400000
+        if (isDarkTheme) {
+            dualToneBackgroundFill.color = Color.WHITE
+            dualToneBackgroundFill.alpha = 0x66
+        } else {
+            dualToneBackgroundFill.color = fillColor
+            dualToneBackgroundFill.alpha = 0x4D
+        }
+        fillPaint.color = fillColor
         levelColor = batteryColorForLevel(batteryLevel)
-
         invalidateSelf()
     }
 
@@ -443,8 +444,8 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
 
     companion object {
         private const val TAG = "ThemedBatteryDrawable"
-        private const val WIDTH = 12f
-        private const val HEIGHT = 20f
+        private const val WIDTH = 35f
+        private const val HEIGHT = 15f
         private const val CRITICAL_LEVEL = 15
         // On a 12x20 grid, how wide to make the fill protection stroke.
         // Scales when our size changes
