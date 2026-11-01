@@ -66,11 +66,11 @@
     <dimen name="status_bar_horizontal_padding">2.5dp</dimen>
 
     <!-- Height of the battery icon in the status bar. -->
-    <dimen name="status_bar_battery_icon_height">13.0dp</dimen>
+    <dimen name="status_bar_battery_icon_height">15dp</dimen>
 
     <!-- Width of the battery icon in the status bar. The battery drawable assumes a 12x20 canvas,
     so the width of the icon should be 13.0dp * (12.0 / 20.0) -->
-    <dimen name="status_bar_battery_icon_width">7.8dp</dimen>
+    <dimen name="status_bar_battery_icon_width">35dp</dimen>
 
     <!-- The font size for the clock in the status bar. -->
     <dimen name="status_bar_clock_size">14sp</dimen>
@@ -88,10 +88,10 @@
     <dimen name="status_bar_left_clock_end_padding">7dp</dimen>
 
     <!-- Spacing after the wifi signals that is present if there are any icons following it. -->
-    <dimen name="status_bar_wifi_signal_spacer_width">2.5dp</dimen>
+    <dimen name="status_bar_wifi_signal_spacer_width">0dp</dimen>
 
     <!-- Size of the view displaying the wifi signal icon in the status bar. -->
-    <dimen name="status_bar_wifi_signal_size">@*android:dimen/status_bar_system_icon_size</dimen>
+    <dimen name="status_bar_wifi_signal_size">18dp</dimen>
 
     <!-- Spacing before the airplane mode icon if there are any icons preceding it. -->
     <dimen name="status_bar_airplane_spacer_width">4dp</dimen>
@@ -274,7 +274,7 @@
     <dimen name="status_bar_padding_start">8dp</dimen>
 
     <!-- the padding on the end of the statusbar -->
-    <dimen name="status_bar_padding_end">8dp</dimen>
+    <dimen name="status_bar_padding_end">0dp</dimen>
 
     <!-- the padding on the top of the statusbar (usually 0) -->
     <dimen name="status_bar_padding_top">0dp</dimen>
@@ -820,13 +820,13 @@
     <dimen name="fake_shadow_size">8dp</dimen>
 
     <!-- Starting margin before the signal cluster -->
-    <dimen name="signal_cluster_margin_start">2.5dp</dimen>
+    <dimen name="signal_cluster_margin_start">0dp</dimen>
 
     <!-- Padding between signal cluster and battery icon -->
-    <dimen name="signal_cluster_battery_padding">6dp</dimen>
+    <dimen name="signal_cluster_battery_padding">0dp</dimen>
 
     <!-- Padding for signal cluster and battery icon when there are not icons in signal cluster -->
-    <dimen name="no_signal_cluster_battery_padding">3dp</dimen>
+    <dimen name="no_signal_cluster_battery_padding">0dp</dimen>
 
     <!-- Screen pinning request width -->
     <dimen name="screen_pinning_request_width">@dimen/match_parent</dimen>
