@@ -201,6 +201,7 @@ import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
+import com.android.systemui.ambientmusic.AmbientIndicationContainer;
 import com.android.systemui.statusbar.VisualizerView;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.BypassHeadsUpNotifier;
@@ -984,6 +985,15 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mAmbientIndicationContainer = mStatusBarWindow.findViewById(
                 R.id.ambient_indication_container);
+        if (mAmbientIndicationContainer instanceof AmbientIndicationContainer) {
+            ((AmbientIndicationContainer) mAmbientIndicationContainer).initializeView(this);
+            mMediaManager.addCallback(new NotificationMediaManager.MediaListener() {
+                @Override
+                public void onMetadataOrStateChanged(MediaMetadata metadata, @PlaybackState.State int state) {
+                    updateAmbientMusicIndication(metadata, state);
+                }
+            });
+        }
 
         // TODO: Find better place for this callback.
         if (mBatteryController != null) {
@@ -4725,6 +4735,31 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mQSBlurImage.setImageDrawable(null);
             }
         }
+    }
+
+    private void updateAmbientMusicIndication(MediaMetadata metadata, int state) {
+        if (!(mAmbientIndicationContainer instanceof AmbientIndicationContainer)) {
+            return;
+        }
+        AmbientIndicationContainer container = (AmbientIndicationContainer) mAmbientIndicationContainer;
+        String nowPlaying = mMediaManager != null ? mMediaManager.getNowPlayingTrack() : null;
+        if (!TextUtils.isEmpty(nowPlaying)) {
+            container.setIndication(nowPlaying);
+            return;
+        }
+        if (metadata != null && NotificationMediaManager.isPlayingState(state)) {
+            CharSequence title = metadata.getText(MediaMetadata.METADATA_KEY_TITLE);
+            CharSequence artist = metadata.getText(MediaMetadata.METADATA_KEY_ARTIST);
+            if (!TextUtils.isEmpty(title)) {
+                if (!TextUtils.isEmpty(artist)) {
+                    container.setIndication(title + " • " + artist);
+                } else {
+                    container.setIndication(title);
+                }
+                return;
+            }
+        }
+        container.setIndication(null);
     }
 
     public void executeActionDismissingKeyguard(Runnable action, boolean afterKeyguardGone) {
