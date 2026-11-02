@@ -60,6 +60,14 @@
         android:visibility="visible"
         sysui:ignoreRightInset="true" />
 
+    <ImageView
+        android:id="@+id/qs_blur"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        sysui:ignoreRightInset="true" />
+
     <FrameLayout
         android:id="@+id/status_bar_container"
         android:layout_width="match_parent"

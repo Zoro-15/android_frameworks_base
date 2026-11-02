@@ -885,6 +885,9 @@ public class NotificationPanelView extends PanelView implements
             PropertyAnimator.setProperty(mKeyguardStatusView, AnimatableProperty.Y,
                     mClockPositionResult.clockY, CLOCK_ANIMATION_PROPERTIES, animateClock);
             updateNotificationTranslucency();
+        if (mStatusBar != null) {
+            mStatusBar.updateBlurVisibility();
+        }
             updateClock();
             stackScrollerPadding = mClockPositionResult.stackScrollerPaddingExpanded;
         }
@@ -2202,6 +2205,9 @@ public class NotificationPanelView extends PanelView implements
         updateExpandedHeight(expandedHeight);
         updateHeader();
         updateNotificationTranslucency();
+        if (mStatusBar != null) {
+            mStatusBar.updateBlurVisibility();
+        }
         updatePanelExpanded();
         updateGestureExclusionRect();
         if (DEBUG) {
@@ -2510,6 +2516,9 @@ public class NotificationPanelView extends PanelView implements
             mAffordanceHelper.animateHideLeftRightIcon();
         }
         mNotificationStackScroller.onPanelTrackingStarted();
+        if (mStatusBar != null) {
+            mStatusBar.updateBlurVisibility();
+        }
     }
 
     @Override
@@ -2521,6 +2530,9 @@ public class NotificationPanelView extends PanelView implements
                     0.0f, true /* onTop */, true /* animate */);
         }
         mNotificationStackScroller.onPanelTrackingStopped();
+        if (mStatusBar != null) {
+            mStatusBar.updateBlurVisibility();
+        }
         if (expand && (mBarState == StatusBarState.KEYGUARD
                 || mBarState == StatusBarState.SHADE_LOCKED)) {
             if (!mHintAnimationRunning) {
@@ -2989,6 +3001,9 @@ public class NotificationPanelView extends PanelView implements
         if (inPinnedMode) {
             mHeadsUpExistenceChangedRunnable.run();
             updateNotificationTranslucency();
+        if (mStatusBar != null) {
+            mStatusBar.updateBlurVisibility();
+        }
         } else {
             setHeadsUpAnimatingAway(true);
             mNotificationStackScroller.runAfterAnimationFinished(

@@ -123,6 +123,9 @@ import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.DateTimeView;
+import android.graphics.Bitmap;
+import android.widget.ImageView;
+import com.android.systemui.ImageUtilities;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
@@ -415,6 +418,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
+    protected ImageView mQSBlurImage;
 
     // settings
     private QSPanel mQSPanel;
@@ -883,6 +887,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // TODO: Deal with the ugliness that comes from having some of the statusbar broken out
         // into fragments, but the rest here, it leaves some awkward lifecycle and whatnot.
         mNotificationPanel = mStatusBarWindow.findViewById(R.id.notification_panel);
+        mQSBlurImage = mStatusBarWindow.findViewById(R.id.qs_blur);
         mStackScroller = mStatusBarWindow.findViewById(R.id.notification_stack_scroller);
         mZenController.addCallback(this);
         NotificationListContainer notifListContainer = (NotificationListContainer) mStackScroller;
@@ -4689,6 +4694,35 @@ public class StatusBar extends SystemUI implements DemoMode,
             int maxNotifications = mPresenter.getMaxNotificationsWhileLocked(true /* recompute */);
             if (maxBefore != maxNotifications) {
                 mViewHierarchyManager.updateRowStates();
+            }
+        }
+    }
+
+    public void applyBlur() {
+        if (mQSBlurImage == null) return;
+        Bitmap blurred = ImageUtilities.captureAndBlur(mContext);
+        if (blurred != null) {
+            mQSBlurImage.setImageBitmap(blurred);
+        }
+    }
+
+    public void updateBlurVisibility() {
+        if (mQSBlurImage == null || mNotificationPanel == null) {
+            return;
+        }
+        float fraction = mNotificationPanel.getExpandedFraction();
+        boolean isKeyguard = (mState == StatusBarState.KEYGUARD);
+
+        if (fraction > 0.0f && !isKeyguard) {
+            if (mQSBlurImage.getVisibility() != View.VISIBLE) {
+                applyBlur();
+                mQSBlurImage.setVisibility(View.VISIBLE);
+            }
+            mQSBlurImage.setAlpha(Math.min(1.0f, fraction));
+        } else {
+            if (mQSBlurImage.getVisibility() != View.GONE) {
+                mQSBlurImage.setVisibility(View.GONE);
+                mQSBlurImage.setImageDrawable(null);
             }
         }
     }

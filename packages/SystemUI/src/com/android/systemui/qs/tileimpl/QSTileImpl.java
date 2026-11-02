@@ -58,6 +58,7 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Prefs;
+import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSIconView;
@@ -97,6 +98,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
     private final StatusBarStateController
             mStatusBarStateController = Dependency.get(StatusBarStateController.class);
+    private final VibratorHelper mVibratorHelper = Dependency.get(VibratorHelper.class);
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
     private final Object mStaleListener = new Object();
@@ -218,7 +220,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                 .addTaggedData(FIELD_STATUS_BAR_STATE,
                         mStatusBarStateController.getState())));
         mHandler.sendEmptyMessage(H.CLICK);
-        performHapticFeedback(VibrationEffect.get(VibrationEffect.EFFECT_POP));
+        mVibratorHelper.vibrate(VibrationEffect.EFFECT_CLICK);
     }
 
     public void secondaryClick() {
@@ -226,7 +228,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                 .addTaggedData(FIELD_STATUS_BAR_STATE,
                         mStatusBarStateController.getState())));
         mHandler.sendEmptyMessage(H.SECONDARY_CLICK);
-        performHapticFeedback(VibrationEffect.get(VibrationEffect.EFFECT_TICK));
+        mVibratorHelper.vibrate(VibrationEffect.EFFECT_CLICK);
     }
 
     public void longClick() {

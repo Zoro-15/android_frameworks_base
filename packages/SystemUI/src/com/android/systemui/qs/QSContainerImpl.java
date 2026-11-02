@@ -21,6 +21,7 @@ import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.util.AttributeSet;
 import android.view.View;
@@ -65,6 +66,9 @@ public class QSContainerImpl extends FrameLayout {
         mQSFooter = findViewById(R.id.qs_footer);
         mBackground = findViewById(R.id.quick_settings_background);
         mStatusBarBackground = findViewById(R.id.quick_settings_status_bar_background);
+        if (mStatusBarBackground != null) {
+            mStatusBarBackground.setBackgroundColor(Color.TRANSPARENT);
+        }
         mBackgroundGradient = findViewById(R.id.quick_settings_gradient_view);
         mSideMargins = getResources().getDimensionPixelSize(R.dimen.notification_side_paddings);
 
@@ -169,7 +173,7 @@ public class QSContainerImpl extends FrameLayout {
         mQSDetail.setBottom(getTop() + height);
         // Pin QS Footer to the bottom of the panel.
         mQSFooter.setTranslationY(height - mQSFooter.getHeight());
-        mBackground.setTop(mQSPanel.getTop());
+        mBackground.setTop(0);
         mBackground.setBottom(height);
     }
 
