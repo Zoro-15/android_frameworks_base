@@ -420,6 +420,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
     protected ImageView mQSBlurImage;
+    protected int mBlurRadius = 25;
 
     // settings
     private QSPanel mQSPanel;
@@ -2971,6 +2972,23 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mViewHierarchyManager.updateRowStates();
         mScreenPinningRequest.onConfigurationChanged();
+
+        if (mQSBlurImage != null && mQSBlurImage.getVisibility() == View.VISIBLE && isQSBlurEnabled()) {
+            if (mNotificationPanel != null) {
+                mNotificationPanel.setPanelAlpha(0, false);
+            }
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    applyBlur();
+                    if (mNotificationPanel != null) {
+                        mNotificationPanel.setPanelAlphaFast(255, true);
+                    }
+                }
+            }, Math.max(390, Math.round(455f * Settings.Global.getFloat(
+                    mContext.getContentResolver(),
+                    Settings.Global.TRANSITION_ANIMATION_SCALE, 1.0f))));
+        }
     }
 
     @Override
@@ -4708,11 +4726,34 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
+    private boolean isQSBlurEnabled() {
+        return Settings.System.getIntForUser(mContext.getContentResolver(),
+                "qs_blur", 1, UserHandle.USER_CURRENT) != 0;
+    }
+
+    private int getQSBlurRadius() {
+        int radius = Settings.System.getIntForUser(mContext.getContentResolver(),
+                "qs_blur_radius", 25, UserHandle.USER_CURRENT);
+        return Math.max(0, Math.min(25, radius));
+    }
+
     public void applyBlur() {
         if (mQSBlurImage == null) return;
-        Bitmap blurred = ImageUtilities.captureAndBlur(mContext);
+        if (!isQSBlurEnabled()) {
+            mQSBlurImage.setImageDrawable(null);
+            return;
+        }
+        mBlurRadius = getQSBlurRadius();
+        if (mBlurRadius == 0) {
+            mQSBlurImage.setImageDrawable(null);
+            return;
+        }
+        Bitmap blurred = ImageUtilities.captureAndBlur(mContext, (float) mBlurRadius);
         if (blurred != null) {
             mQSBlurImage.setImageBitmap(blurred);
+        } else {
+            // Protected layer (FLAG_SECURE / DRM): clear image to prevent crash/stale buffer
+            mQSBlurImage.setImageDrawable(null);
         }
     }
 
@@ -4723,7 +4764,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         float fraction = mNotificationPanel.getExpandedFraction();
         boolean isKeyguard = (mState == StatusBarState.KEYGUARD);
 
-        if (fraction > 0.0f && !isKeyguard) {
+        if (fraction > 0.0f && !isKeyguard && isQSBlurEnabled()) {
             if (mQSBlurImage.getVisibility() != View.VISIBLE) {
                 applyBlur();
                 mQSBlurImage.setVisibility(View.VISIBLE);

@@ -31,26 +31,22 @@ import android.view.WindowManager;
 
 public class ImageUtilities {
     private static final String TAG = "ImageUtilities";
-    private static final float BLUR_RADIUS = 7.5f;
-    private static final float BLUR_SCALE = 0.4f;
+    public static final float DEFAULT_BLUR_RADIUS = 25.0f;
+    private static final float BITMAP_SCALE = 0.35f;
 
-    public static Bitmap blur(Context context, Bitmap image, float radius, float scale) {
+    public static Bitmap blur(Context context, Bitmap image, float radius) {
         if (image == null) return null;
+        float radAmount = Math.max(0.1f, Math.min(25.0f, radius));
         RenderScript rs = null;
         try {
-            int width = Math.round(image.getWidth() * scale);
-            int height = Math.round(image.getHeight() * scale);
-            if (width <= 0 || height <= 0) return null;
-
-            Bitmap input = Bitmap.createScaledBitmap(image, width, height, false);
-            Bitmap output = Bitmap.createBitmap(input.getWidth(), input.getHeight(), Bitmap.Config.ARGB_8888);
+            Bitmap output = Bitmap.createBitmap(image.getWidth(), image.getHeight(), Bitmap.Config.ARGB_8888);
 
             rs = RenderScript.create(context);
-            Allocation tmpIn = Allocation.createFromBitmap(rs, input);
+            Allocation tmpIn = Allocation.createFromBitmap(rs, image);
             Allocation tmpOut = Allocation.createFromBitmap(rs, output);
 
             ScriptIntrinsicBlur blurScript = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
-            blurScript.setRadius(radius);
+            blurScript.setRadius(radAmount);
             blurScript.setInput(tmpIn);
             blurScript.forEach(tmpOut);
             tmpOut.copyTo(output);
@@ -67,10 +63,10 @@ public class ImageUtilities {
     }
 
     public static Bitmap blur(Context context, Bitmap image) {
-        return blur(context, image, BLUR_RADIUS, BLUR_SCALE);
+        return blur(context, image, DEFAULT_BLUR_RADIUS);
     }
 
-    public static Bitmap captureAndBlur(Context context) {
+    public static Bitmap screenshotSurface(Context context) {
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display display = wm != null ? wm.getDefaultDisplay() : null;
         if (display == null) return null;
@@ -80,9 +76,12 @@ public class ImageUtilities {
         int rotation = display.getRotation();
 
         Rect crop = new Rect(0, 0, dm.widthPixels, dm.heightPixels);
-        Bitmap screenshot = SurfaceControl.screenshot(crop, dm.widthPixels, dm.heightPixels, rotation);
+        int scaledWidth = Math.max(1, Math.round(dm.widthPixels * BITMAP_SCALE));
+        int scaledHeight = Math.max(1, Math.round(dm.heightPixels * BITMAP_SCALE));
+
+        Bitmap screenshot = SurfaceControl.screenshot(crop, scaledWidth, scaledHeight, rotation);
         if (screenshot == null) {
-            Log.w(TAG, "SurfaceControl.screenshot returned null");
+            Log.w(TAG, "SurfaceControl.screenshot returned null (protected layer or display unavailable)");
             return null;
         }
 
@@ -90,11 +89,19 @@ public class ImageUtilities {
                 ? screenshot.copy(Bitmap.Config.ARGB_8888, false)
                 : screenshot;
 
-        if (softwareBitmap == null) {
-            return null;
+        if (softwareBitmap != null) {
+            softwareBitmap.prepareToDraw();
         }
+        return softwareBitmap;
+    }
 
-        return blur(context, softwareBitmap, BLUR_RADIUS, BLUR_SCALE);
+    public static Bitmap captureAndBlur(Context context, float radius) {
+        Bitmap screenshot = screenshotSurface(context);
+        if (screenshot == null) return null;
+        return blur(context, screenshot, radius);
+    }
+
+    public static Bitmap captureAndBlur(Context context) {
+        return captureAndBlur(context, DEFAULT_BLUR_RADIUS);
     }
 }
-
