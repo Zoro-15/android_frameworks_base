@@ -104,6 +104,7 @@ import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -3794,6 +3795,9 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         updateQsExpansionEnabled();
         mKeyguardViewMediator.setDozing(mDozing);
+        if (mAmbientIndicationContainer instanceof AmbientIndicationContainer) {
+            ((AmbientIndicationContainer) mAmbientIndicationContainer).setDozing(mDozing);
+        }
 
         mEntryManager.updateNotifications();
         updateDozingState();

@@ -60,7 +60,6 @@ public class AmbientIndicationContainer extends AutoReinflateContainer implement
         setIndication(mIndication);
     }
 
-    @Override
     public void setDozing(boolean dozing) {
         mDozing = dozing;
         updateVisibility();
