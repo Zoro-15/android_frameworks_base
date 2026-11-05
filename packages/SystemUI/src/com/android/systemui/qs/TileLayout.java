@@ -2,6 +2,9 @@ package com.android.systemui.qs;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.UserHandle;
+import android.provider.Settings;
+import android.util.TypedValue;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -80,16 +83,24 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         super.removeAllViews();
     }
 
+    private boolean isTitleVisible() {
+        return Settings.System.getIntForUser(mContext.getContentResolver(),
+                "qs_tile_title_visibility", 1, UserHandle.USER_CURRENT) == 1;
+    }
+
     public boolean updateResources() {
         final Resources res = mContext.getResources();
         final int columns = Math.max(1, res.getInteger(R.integer.quick_settings_num_columns));
-        mCellHeight = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_height);
+        final int oldCellHeight = mCellHeight;
+        mCellHeight = isTitleVisible()
+                ? res.getDimensionPixelSize(R.dimen.qs_tile_height)
+                : (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 64, res.getDisplayMetrics());
         mCellMarginHorizontal = res.getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal);
         mCellMarginVertical= res.getDimensionPixelSize(R.dimen.qs_tile_margin_vertical);
         mCellMarginTop = res.getDimensionPixelSize(R.dimen.qs_tile_margin_top);
         mSidePadding = res.getDimensionPixelOffset(R.dimen.qs_tile_layout_margin_side);
         mMaxAllowedRows = Math.max(1, getResources().getInteger(R.integer.quick_settings_max_rows));
-        if (mColumns != columns) {
+        if (mColumns != columns || oldCellHeight != mCellHeight) {
             mColumns = columns;
             requestLayout();
             return true;
