@@ -52,7 +52,10 @@
                 android:layout_height="match_parent"
                 android:layoutDirection="rtl"
                 android:layout_gravity="center"
-                android:rotation="90" />
+                android:rotation="90"
+                android:thumb="@null"
+                android:splitTrack="false"
+                android:background="@null" />
         </FrameLayout>
 
         <com.android.keyguard.AlphaOptimizedImageButton

@@ -220,7 +220,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                 .addTaggedData(FIELD_STATUS_BAR_STATE,
                         mStatusBarStateController.getState())));
         mHandler.sendEmptyMessage(H.CLICK);
-        mVibratorHelper.vibrate(VibrationEffect.EFFECT_CLICK);
+        performHapticFeedback(VibrationEffect.createOneShot(15, VibrationEffect.DEFAULT_AMPLITUDE));
     }
 
     public void secondaryClick() {
@@ -228,7 +228,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                 .addTaggedData(FIELD_STATUS_BAR_STATE,
                         mStatusBarStateController.getState())));
         mHandler.sendEmptyMessage(H.SECONDARY_CLICK);
-        mVibratorHelper.vibrate(VibrationEffect.EFFECT_CLICK);
+        performHapticFeedback(VibrationEffect.createOneShot(15, VibrationEffect.DEFAULT_AMPLITUDE));
     }
 
     public void longClick() {
@@ -437,7 +437,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
             case Tile.STATE_INACTIVE:
                 return Utils.getColorAttrDefaultColor(context, android.R.attr.textColorSecondary);
             case Tile.STATE_ACTIVE:
-                return Utils.getColorAttrDefaultColor(context, android.R.attr.colorPrimary);
+                return 0xFFFFFFFF;
             default:
                 Log.e("QSTile", "Invalid state " + state);
                 return 0;

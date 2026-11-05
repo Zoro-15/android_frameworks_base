@@ -36,13 +36,14 @@
         android:layout_centerVertical="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
+        android:paddingStart="0dp"
+        android:paddingEnd="0dp"
         android:paddingTop="16dp"
         android:paddingBottom="16dp"
-        android:thumb="@drawable/ic_brightness_thumb"
+        android:thumb="@null"
         android:progressDrawable="@drawable/brightness_progress_drawable"
         android:splitTrack="false"
+        android:background="@null"
         />
     <TextView
         android:id="@+id/label"

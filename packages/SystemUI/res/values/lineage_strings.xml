@@ -31,7 +31,7 @@
     <string name="clock_title_default_bold" translatable="false">Default (bold)</string>
     <string name="clock_title_samsung" translatable="false">Samsung</string>
     <string name="clock_title_samsung_bold" translatable="false">Samsung (bold)</string>
-    <string name="clock_title_apple" translatable="false">Apple</string>
+
 
 
     <!-- Time displayed on typographic clock face, which displays the time in words.

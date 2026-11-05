@@ -804,13 +804,13 @@ please see styles_device_defaults.xml.
         <item name="progressDrawable">@drawable/seekbar_track_material</item>
         <item name="indeterminateDrawable">@drawable/seekbar_track_material</item>
         <item name="thumb">@drawable/seekbar_thumb_material_anim</item>
-        <item name="splitTrack">true</item>
+        <item name="splitTrack">false</item>
         <item name="useDisabledAlpha">false</item>
         <item name="focusable">true</item>
         <item name="paddingStart">16dip</item>
         <item name="paddingEnd">16dip</item>
         <item name="mirrorForRtl">true</item>
-        <item name="background">@drawable/control_background_32dp_material</item>
+        <item name="background">@null</item>
     </style>
 
     <!-- A seek bar with tick marks at each progress value. -->
