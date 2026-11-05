@@ -17,7 +17,6 @@ package com.android.systemui.qs.tileimpl;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
-import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.view.Gravity;
@@ -85,9 +84,6 @@ public class QSTileView extends QSTileBaseView {
 
     @Override
     public int getDetailY() {
-        if (mLabelContainer == null || mLabelContainer.getVisibility() == View.GONE) {
-            return getTop() + getHeight() / 2;
-        }
         return getTop() + mLabelContainer.getTop() + mLabelContainer.getHeight() / 2;
     }
 
@@ -103,7 +99,6 @@ public class QSTileView extends QSTileBaseView {
         mExpandSpace = mLabelContainer.findViewById(R.id.expand_space);
         mSecondLine = mLabelContainer.findViewById(R.id.app_label);
         addView(mLabelContainer);
-        updateLabelVisibility();
     }
 
     @Override
@@ -145,15 +140,8 @@ public class QSTileView extends QSTileBaseView {
         }
         mLabel.setEnabled(!state.disabledByPolicy);
         mPadLock.setVisibility(state.disabledByPolicy ? View.VISIBLE : View.GONE);
-        updateLabelVisibility();
     }
 
-    private void updateLabelVisibility() {
-        if (mLabelContainer == null) return;
-        boolean titleVisible = Settings.System.getInt(getContext().getContentResolver(),
-                "qs_tile_title_visibility", 0) == 1;
-        mLabelContainer.setVisibility(titleVisible ? View.VISIBLE : View.GONE);
-    }
 
     @Override
     public void init(OnClickListener click, OnClickListener secondaryClick,
