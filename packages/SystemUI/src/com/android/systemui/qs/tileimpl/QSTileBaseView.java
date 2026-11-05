@@ -239,18 +239,10 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         return mLocInScreen[1] >= -getHeight();
     }
 
-    private static int adjustAlpha(int color, float factor) {
-        int alpha = Math.round(Color.alpha(color) * factor);
-        int red = Color.red(color);
-        int green = Color.green(color);
-        int blue = Color.blue(color);
-        return Color.argb(alpha, red, green, blue);
-    }
-
     private int getCircleColor(int state) {
         switch (state) {
             case Tile.STATE_ACTIVE:
-                return adjustAlpha(mColorActive, 0.20f);
+                return mColorActive;
             case Tile.STATE_INACTIVE:
             case Tile.STATE_UNAVAILABLE:
                 return mColorDisabled;

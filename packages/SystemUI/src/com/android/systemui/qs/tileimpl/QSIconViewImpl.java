@@ -181,28 +181,21 @@ public class QSIconViewImpl extends QSIconView {
         if (mAnimationEnabled && ValueAnimator.areAnimatorsEnabled()) {
             final float fromAlpha = Color.alpha(fromColor);
             final float toAlpha = Color.alpha(toColor);
-            final float fromR = Color.red(fromColor);
-            final float toR = Color.red(toColor);
-            final float fromG = Color.green(fromColor);
-            final float toG = Color.green(toColor);
-            final float fromB = Color.blue(fromColor);
-            final float toB = Color.blue(toColor);
+            final float fromChannel = Color.red(fromColor);
+            final float toChannel = Color.red(toColor);
 
             ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
             anim.setDuration(QS_ANIM_LENGTH);
             anim.addUpdateListener(animation -> {
                 float fraction = animation.getAnimatedFraction();
                 int alpha = (int) (fromAlpha + (toAlpha - fromAlpha) * fraction);
-                int r = (int) (fromR + (toR - fromR) * fraction);
-                int g = (int) (fromG + (toG - fromG) * fraction);
-                int b = (int) (fromB + (toB - fromB) * fraction);
+                int channel = (int) (fromChannel + (toChannel - fromChannel) * fraction);
 
-                setTint(iv, Color.argb(alpha, r, g, b));
+                setTint(iv, Color.argb(alpha, channel, channel, channel));
             });
             anim.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    setTint(iv, toColor);
                     endRunnable.run();
                 }
             });
