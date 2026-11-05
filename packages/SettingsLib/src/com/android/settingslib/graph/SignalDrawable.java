@@ -213,15 +213,7 @@ public class SignalDrawable extends DrawableWrapper {
             canvas.drawPath(mCutoutPath, mTransparentPaint);
             canvas.drawPath(mForegroundPath, mForegroundPaint);
         } else if (isInState(STATE_CUT)) {
-            float cutX = (mCutoutWidthFraction * width / VIEWPORT);
-            float cutY = (mCutoutHeightFraction * height / VIEWPORT);
-            mCutoutPath.moveTo(width, height);
-            mCutoutPath.rLineTo(-cutX, 0);
-            mCutoutPath.rLineTo(0, -cutY);
-            mCutoutPath.rLineTo(cutX, 0);
-            mCutoutPath.rLineTo(0, cutY);
-            canvas.drawPath(mCutoutPath, mTransparentPaint);
-            canvas.drawPath(mScaledXPath, mForegroundPaint);
+            // Cutout disabled: preserve clean solid signal bars with no "x" icon
         }
         if (isRtl) {
             canvas.restore();
