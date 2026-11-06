@@ -239,8 +239,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
                 mTileLayout.updateResources();
             }
             for (TileRecord record : mRecords) {
-                if (record.tileView instanceof QSTileView) {
-                    ((QSTileView) record.tileView).updateLabelVisibility();
+                if (record.tileView instanceof com.android.systemui.qs.tileimpl.QSTileView) {
+                    ((com.android.systemui.qs.tileimpl.QSTileView) record.tileView).updateLabelVisibility();
                 }
             }
             requestLayout();
